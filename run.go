@@ -8,6 +8,7 @@ import (
 
 
 func Run(tty bool, command string) {
+	log.Infof("------------------Run")
 	parent := container.NewParentProcess(tty,command)
 	if err := parent.Start(); err != nil {
 		log.Error(err)

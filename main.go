@@ -10,6 +10,45 @@ import (
 
 const usage = "mydocker study. mydocker is a simple container runtime implementation"
 
+var runCommand = cli.Command{
+	Name:"run",
+	Usage:`Create a container with namespace and cgroup limits
+			mydocker run -it [command]
+		`,
+	Flags:[]cli.Flag{
+		cli.BoolFlag{
+			Name:"ti",
+			Usage:"enable tty",
+		},
+	},
+
+	Action:func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("missing container command")
+		}
+
+		cmd :=context.Args().Get(0)
+		log.Infof("run command cmd=%s",cmd)
+		tty :=context.Bool("ti")
+		Run(tty,cmd)
+
+		return nil
+	},
+
+}
+
+var initCommand = cli.Command{
+	Name:"init",
+	Usage:"init container process run users process in container Do not call it outside",
+	Action:func(context *cli.Context) error {
+		log.Infof("init come on")
+		cmd := context.Args().Get(0)
+		log.Infof("initCommand %s",cmd)
+		err :=container.RunContainerInitProcess(cmd,nil)
+		return err
+	},
+}
+
 func main(){
 	app := cli.NewApp()
 	app.Name = "mydocker"
@@ -30,6 +69,7 @@ func main(){
 		return nil
 	}
 
+	log.Printf("os.Args=%s",os.Args)
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
@@ -37,42 +77,6 @@ func main(){
 }
 
 
-var runCommand = cli.Command{
-	Name:"run",
-	Usage:`Create a container with namespace and cgroup limits
-			mydocker run -it [command]
-		`,
-	Flags:[]cli.Flag{
-		cli.BoolFlag{
-			Name:"ti",
-			Usage:"enable tty",
-		},
-	},
 
-	Action:func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
-			return fmt.Errorf("missing container command")
-		}
-
-		cmd :=context.Args().Get(0)
-		tty :=context.Bool("ti")
-		Run(tty,cmd)
-
-		return nil
-	},
-
-}
-var initCommand = cli.Command{
-	Name:"init",
-	Usage:"init container process run users process in container Do not call it outside",
-	Action:func(context *cli.Context) error {
-		log.Infof("init come on")
-		cmd := context.Args().Get(0)
-		log.Infof("command %s",cmd)
-		err :=container.RunContainerInitProcess(cmd,nil)
-		return err
-		return nil
-	},
-}
 
 
